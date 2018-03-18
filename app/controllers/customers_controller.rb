@@ -1,8 +1,9 @@
 class CustomersController < ApplicationController
-
+  before_action :authenticate_user!
   before_action :set_customer, only: [:edit, :update, :show, :destroy]
   def index
-    @customers = Customer.page(params[:page])
+    @q = Customer.includes(:company, :post).ransack(params[:q])
+    @customers = @q.result.page(params[:page])
   end
 
   def new
@@ -33,21 +34,23 @@ class CustomersController < ApplicationController
   end
 
   def show
+    @comment = Comment.new
+    @comments = @customer.comments
 
   end
 
   def destroy
-    def destroy
+
 
     @customer.destroy
     redirect_to customers_path
-    end
+    
   end
 
   private
 
   def customer_params
-    params.require(:customer).permit(:family_name, :given_name, :email, :company_id)
+    params.require(:customer).permit(:family_name, :given_name, :email, :company_id, :post_id)
   end
 
   def set_customer
